@@ -1,5 +1,5 @@
 import torch.nn as nn
-from modules.positional_encoder import PositionalEncoder
+from utils.positional_encoder import PositionalEncoder
 
 # TODO: fix for classification
 # transformer

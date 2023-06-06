@@ -20,6 +20,7 @@ class AudioLSTM(nn.Module):
 
         return out
 
+
 if __name__=="__main__":
     input_size = 10
     hidden_size = 128
