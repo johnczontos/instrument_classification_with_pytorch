@@ -19,3 +19,14 @@ class AudioLSTM(nn.Module):
         out = self.fc(out[:, -1, :])
 
         return out
+
+if __name__=="__main__":
+    input_size = 10
+    hidden_size = 128
+    num_layers = 2
+    num_classes = 5
+
+    model = AudioLSTM(input_size, hidden_size, num_layers, num_classes, bidirectional=True)
+    input_tensor = torch.randn(32, 100, input_size)  # Batch size of 32, sequence length of 100
+    output = model(input_tensor)
+    print(output.shape)
