@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 # from modules.audio_transformer import AudioTransformer
 from modules.audio_lstm import AudioLSTM
 from modules.data import AudioClassificationDataset
-from modules.trainer import Trainer
+from utils.trainer import Trainer
 from utils.metrics import calculate_metrics
 
 from sklearn.model_selection import train_test_split
@@ -34,9 +34,10 @@ run = neptune.init_run(
 )
 
 # Instantiate the dataset
-root_dir = '/nfs/guille/eecs_research/soundbendor/zontosj/instrument_classification_with_pytorch/data/mini_test/in'
-csv_file = '/nfs/guille/eecs_research/soundbendor/zontosj/instrument_classification_with_pytorch/data/mini_test/dataset.csv'
+root_dir = '/nfs/guille/eecs_research/soundbendor/zontosj/instrument_classification_with_pytorch/data/piano_guitar_violin/in'
+csv_file = '/nfs/guille/eecs_research/soundbendor/zontosj/instrument_classification_with_pytorch/data/piano_guitar_violin/dataset.csv'
 dataset = AudioClassificationDataset(root_dir, csv_file)
+print("INFO: Dataset loaded.")
 
 # hyperparams
 params = {
@@ -45,7 +46,7 @@ params = {
     "num_epochs": 10,
     "input_size": dataset.wav_length,
     "num_classes": dataset.num_classes,
-    "val_split": 0.1,
+    "val_split": 0.2,
     "test_split": 0.3,
     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
     "model_name": "audio_lstm",
@@ -58,18 +59,20 @@ params = {
 train_split = 1 - (params["test_split"] + params["val_split"])
 
 # Split the dataset into train and remaining data
-train_data, remaining_data = train_test_split(dataset, test_size=1 - train_split, random_state=42)
+train_data, remaining_data = train_test_split(dataset, test_size=1 - train_split, random_state=42, shuffle=True)
 
 # Split the remaining data into validation and test sets
-val_data, test_data = train_test_split(remaining_data, test_size=params["test_split"] / (params["val_split"] + params["test_split"]), random_state=42)
+val_data, test_data = train_test_split(remaining_data, test_size=params["test_split"] / (params["val_split"] + params["test_split"]), random_state=42, shuffle=True)
 
 # Create data loaders for training and validation
 train_loader = DataLoader(train_data, batch_size=params["batch_size"], shuffle=True)
 val_loader = DataLoader(val_data, batch_size=params["batch_size"])
 test_loader = DataLoader(test_data, batch_size=params["batch_size"])
+print("INFO: Dataloaders created.")
 
 # Instantiate the model
 model = AudioLSTM(params["input_size"], params["hidden_size"], params["num_layers"], params["num_classes"], params["bidirectional"])
+print("INFO: Model created.")
 
 # Define the loss function and optimizer
 criterion = nn.CrossEntropyLoss()
@@ -77,6 +80,7 @@ optimizer = optim.Adam(model.parameters(), lr=params["learning_rate"])
 
 # Create model trainer
 trainer = Trainer(model, criterion, optimizer, params, run)
+print("INFO: Trainer Created.")
 
 # Training loop
 total_steps = len(train_loader)
@@ -97,11 +101,13 @@ for epoch in range(params["num_epochs"]):
         # torch.save(model, 'audio_lstm_model.pt')
 
     # Print progress
-    print('------------------ Epoch [{}/{}] ------------------\n\
-          Training Loss: {:.4f} Training Accuracy: {:.2f}\n\
-          Validation Loss: {:.4f} Validation Accuracy: {:.2f}'.format(epoch + 1, params["num_epochs"], avg_train_loss, train_accuracy, avg_val_loss, val_accuracy))
+    print('------------------ Epoch [{}/{}] ------------------'.format(epoch + 1, params["num_epochs"]))
+    print('Training Loss: {:.4f} Training Accuracy: {:.2f}'.format(avg_train_loss, train_accuracy))
+    print('Validation Loss: {:.4f} Validation Accuracy: {:.2f}'.format(avg_val_loss, val_accuracy))
+
     
 # Evaluation
+print("INFO: Evaluation.")
 predicted, scores, labels = trainer.evaluate(test_loader)
 results = calculate_metrics(predicted, scores, labels)
 
