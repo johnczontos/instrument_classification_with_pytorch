@@ -3,7 +3,7 @@ import csv
 import glob
 
 # Define the directory path
-data_path = "/nfs/guille/eecs_research/soundbendor/zontosj/instrument_classification_with_pytorch/data/piano_guitar_violin/in"
+data_path = "/nfs/guille/eecs_research/soundbendor/zontosj/instrument_classification_with_pytorch/data/rwc_all/clean/split"
 
 # Get the list of directories
 dirs = [d.name for d in os.scandir(data_path) if d.is_dir()]
@@ -22,10 +22,13 @@ for i, directory in enumerate(dirs):
 
     # Append the file name and label code to the data list
     for audio_file in audio_files:
-        data.append([os.path.basename(audio_file)] + code)
+        base = os.path.basename(audio_file)
+        full_filename = os.path.join(directory, base)
+        data.append([full_filename] + code)
 
 # Write the data to the CSV file
-with open("dataset.csv", "w", newline="") as csv_file:
+csv_path = os.path.join(data_path, "dataset.csv")
+with open(csv_path, "w", newline="") as csv_file:
     writer = csv.writer(csv_file)
     writer.writerow(header)
     writer.writerows(data)

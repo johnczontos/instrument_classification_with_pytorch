@@ -1,0 +1,72 @@
+torch.cuda.is_available(): True
+https://app.neptune.ai/Soundbendor/instrument-classification/e/IN-89
+INFO: Dataset loaded.
+------------------ Dataset Info --------------------
+root_dir: data/rwc_all/clean/split
+transform: None
+class_names: Index(['02', '05', '14', '08', '11', '13', '04', '01', '09', '12', '06', '03',
+       '10', '07'],
+      dtype='object')
+num_classes: 14
+----------------------------------------------------
+INFO: Dataloaders created.
+INFO: Model created.
+Multiple GPUs available, using: 2
+INFO: Trainer Created.
+------------------ Epoch [1/100] ------------------
+Training Loss: 1.7172 Training Accuracy: 0.44
+Validation Loss: 1.3163 Validation Accuracy: 0.57
+------------------ Epoch [2/100] ------------------
+Training Loss: 0.9338 Training Accuracy: 0.69
+Validation Loss: 1.0390 Validation Accuracy: 0.67
+------------------ Epoch [3/100] ------------------
+Training Loss: 0.5947 Training Accuracy: 0.80
+Validation Loss: 1.0106 Validation Accuracy: 0.71
+------------------ Epoch [4/100] ------------------
+Training Loss: 0.4571 Training Accuracy: 0.85
+Validation Loss: 1.0342 Validation Accuracy: 0.72
+------------------ Epoch [5/100] ------------------
+Training Loss: 0.3554 Training Accuracy: 0.88
+Validation Loss: 1.0827 Validation Accuracy: 0.73
+------------------ Epoch [6/100] ------------------
+Training Loss: 0.2867 Training Accuracy: 0.90
+Validation Loss: 1.1396 Validation Accuracy: 0.73
+------------------ Epoch [7/100] ------------------
+Training Loss: 0.2421 Training Accuracy: 0.92
+Validation Loss: 1.1941 Validation Accuracy: 0.74
+------------------ Epoch [8/100] ------------------
+Training Loss: 0.2095 Training Accuracy: 0.93
+Validation Loss: 1.2477 Validation Accuracy: 0.74
+------------------ Epoch [9/100] ------------------
+Training Loss: 0.1737 Training Accuracy: 0.94
+Validation Loss: 1.3369 Validation Accuracy: 0.74
+------------------ Epoch [10/100] ------------------
+Training Loss: 0.1771 Training Accuracy: 0.94
+Validation Loss: 1.3662 Validation Accuracy: 0.74
+------------------ Epoch [11/100] ------------------
+Training Loss: 0.1710 Training Accuracy: 0.94
+Validation Loss: 1.3677 Validation Accuracy: 0.74
+------------------ Epoch [12/100] ------------------
+Training Loss: 0.1243 Training Accuracy: 0.96
+Validation Loss: 1.4277 Validation Accuracy: 0.75
+------------------ Epoch [13/100] ------------------
+Training Loss: 0.1035 Training Accuracy: 0.97
+Validation Loss: 1.4840 Validation Accuracy: 0.75
+------------------ Epoch [14/100] ------------------
+Training Loss: 0.1052 Training Accuracy: 0.97
+Validation Loss: 1.4928 Validation Accuracy: 0.75
+------------------ Epoch [15/100] ------------------
+Training Loss: 0.1062 Training Accuracy: 0.97
+Validation Loss: 1.5356 Validation Accuracy: 0.74
+------------------ Epoch [16/100] ------------------
+Training Loss: 0.1069 Training Accuracy: 0.97
+Validation Loss: 1.5687 Validation Accuracy: 0.74
+------------------ Epoch [17/100] ------------------
+Training Loss: 0.1073 Training Accuracy: 0.97
+Validation Loss: 1.5681 Validation Accuracy: 0.74
+------------------ Epoch [18/100] ------------------
+Training Loss: 0.1259 Training Accuracy: 0.96
+Validation Loss: 1.5588 Validation Accuracy: 0.74
+------------------ Epoch [19/100] ------------------
+Training Loss: 0.1159 Training Accuracy: 0.96
+Validation Loss: 1.5612 Validation Accuracy: 0.74

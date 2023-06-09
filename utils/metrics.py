@@ -18,3 +18,15 @@ def calculate_metrics(predicted, scores, labels):
             'auc_roc': auc_roc
         }
         return results
+
+
+def print_results(results, best_val_accuracy):
+    print('--------------------- Results ----------------------')
+    print('best_val_accuracy: {:.4f}'.format(best_val_accuracy))
+    print('Test Accuracy: {:.4f}'.format(results['accuracy']))
+    print('f1: {:.2f}'.format(results['f1']))
+    print('precision: {:.2f}'.format(results['precision']))
+    print('recall: {:.2f}'.format(results['recall']))
+    print('mcc: {:.2f}'.format(results['mcc']))
+    print('auc_roc: {:.2f}'.format(results['auc_roc']))
+    print('----------------------------------------------------')
