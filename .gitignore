@@ -1,3 +1,9 @@
+# neptune
+.neptune/
+
+# logs
+logs/
+
 # data
 data/
 
@@ -169,3 +175,7 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+.neptune/async/run__995e46a9-21d8-48ee-a47d-b3e9dee43256/exec-1686301914.749631-2023-06-09_02.11.54.749631/last_ack_version
+.neptune/async/run__995e46a9-21d8-48ee-a47d-b3e9dee43256/exec-1686301914.749631-2023-06-09_02.11.54.749631/last_put_version
+
+
