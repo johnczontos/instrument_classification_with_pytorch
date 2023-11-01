@@ -50,17 +50,19 @@ def main(root_dir, csv_file):
 
     # hyperparams
     params = {
-        "learning_rate": 3e-3,
-        "batch_size": 256,
-        "num_epochs": 100,
+        "learning_rate": 4e-4,
+        "dropout": 0.5,
+        "batch_size": 512,
+        "num_epochs": 50,
         "input_size": dataset.wav_length,
         "num_classes": dataset.num_classes,
-        "val_split": 0.2,
+        "data_length": len(dataset),
+        "val_split": 0.1,
         "test_split": 0.1,
         "device": device,
         "model_name": "audio_lstm",
-        "hidden_size": 256,
-        "num_layers": 2,
+        "hidden_size": 512,
+        "num_layers": 4,
         "bidirectional": True,
     }
 
@@ -81,12 +83,13 @@ def main(root_dir, csv_file):
     print("INFO: Dataloaders created.")
 
     # Instantiate the model
-    model = AudioLSTM(params["input_size"], params["hidden_size"], params["num_layers"], params["num_classes"], params["bidirectional"])
+    model = AudioLSTM(params["input_size"], params["hidden_size"], params["num_layers"], params["num_classes"], params["bidirectional"], params["dropout"])
     print("INFO: Model created.")
 
     if torch.cuda.device_count() > 1:
         print("Multiple GPUs available, using: " + str(torch.cuda.device_count()))
         model = nn.DataParallel(model)
+    model.to(device)
 
     # Define the loss function and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -117,6 +120,12 @@ def main(root_dir, csv_file):
         print('Training Loss: {:.4f} Training Accuracy: {:.2f}'.format(avg_train_loss, train_accuracy))
         print('Validation Loss: {:.4f} Validation Accuracy: {:.2f}'.format(avg_val_loss, val_accuracy))
 
+        run["logging/train/epoch/loss"].append(avg_train_loss)
+        run["logging/train/epoch/acc"].append(train_accuracy)
+
+        run["logging/validation/epoch/loss"].append(avg_val_loss)
+        run["logging/validation/epoch/acc"].append(val_accuracy)
+
         
     # Evaluation
     print("INFO: Evaluation.")
@@ -124,7 +133,6 @@ def main(root_dir, csv_file):
     results = calculate_metrics(predicted, scores, labels)
     print_results(results, best_val_accuracy)
     run['results'] = results
-    run["sys"].upload_files(["logs/run_model.err", "logs/run_model.out"])
     run.stop()
 
 
