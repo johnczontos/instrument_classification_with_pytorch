@@ -3,6 +3,8 @@
 
 # logs
 logs/
+*.err
+*.out
 
 # data
 data/
