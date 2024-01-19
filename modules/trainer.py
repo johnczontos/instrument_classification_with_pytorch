@@ -1,9 +1,8 @@
 import torch
 from neptune_pytorch import NeptuneLogger
-from neptune.utils import stringify_unsupported
 
 class Trainer:
-    def __init__(self, model, criterion, optimizer, params, run, device):
+    def __init__(self, model, criterion, optimizer, run, device):
         self.model = model.to(device)
         self.criterion = criterion
         self.optimizer = optimizer
@@ -21,8 +20,6 @@ class Trainer:
         )
 
         self.run = run
-
-        self.run[self.npt_logger.base_namespace]["hyperparams"] = stringify_unsupported(params)
 
 
     def train(self, train_loader, pbar=None):
@@ -53,15 +50,15 @@ class Trainer:
             correct += (predicted == labels).sum().item()
 
             # Log after every 10 steps
-            if i % 10 == 0:
-                self.run[self.npt_logger.base_namespace]["train/batch/loss"].append(batch_loss.item())
-                self.run[self.npt_logger.base_namespace]["train/batch/acc"].append(correct / total)
+            # if i % 10 == 0:
+            #     self.run[self.npt_logger.base_namespace]["train/batch/loss"].append(batch_loss.item())
+            #     self.run[self.npt_logger.base_namespace]["train/batch/acc"].append(correct / total)
 
             if pbar:
                 pbar.update(1)
         accuracy = correct / total
         avg_loss = epoch_loss / len(train_loader)
-        self.npt_logger.save_model("model")
+        # self.npt_logger.save_model("model")
         return avg_loss, accuracy
 
     def validate(self, val_loader):
@@ -88,9 +85,9 @@ class Trainer:
                 correct += (predicted == labels).sum().item()
 
                 # Log after every 10 steps
-                if i % 10 == 0:
-                    self.run[self.npt_logger.base_namespace]["validation/batch/loss"].append(batch_loss.item())
-                    self.run[self.npt_logger.base_namespace]["validation/batch/acc"].append(correct / total)
+                # if i % 10 == 0:
+                #     self.run[self.npt_logger.base_namespace]["validation/batch/loss"].append(batch_loss.item())
+                #     self.run[self.npt_logger.base_namespace]["validation/batch/acc"].append(correct / total)
 
             accuracy = correct / total
             avg_loss = epoch_loss / len(val_loader)

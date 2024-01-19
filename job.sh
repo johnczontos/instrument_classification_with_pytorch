@@ -18,8 +18,5 @@ module load python/3.10 cuda/11.7 sox
 # load env
 source env/bin/activate
 
-# load env
-source env/bin/activate
-
 # run model
 python run_model.py data/rwc_all/clean/split

@@ -18,53 +18,51 @@ from torch.utils.data import DataLoader, random_split
 
 # from modules.audio_transformer import AudioTransformer
 from modules.audio_lstm import AudioLSTM
+# from modules.audio_transformer import AudioTransformer
 from modules.data import AudioClassificationDataset
+from modules.audio_nn import AudioNN
 from modules.trainer import Trainer
 from utils.metrics import calculate_metrics, print_results
 
 # from sklearn.model_selection import train_test_split
+import argparse
 import random
 import tqdm as tq
 import sys
 import os
 
 import neptune
+from neptune.utils import stringify_unsupported
 
 print("torch.cuda.is_available(): " + str(torch.cuda.is_available()))
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def main(root_dir, csv_file):
+def main(root_dir, csv_file, params):
     # Instantiate Neptune
     run = neptune.init_run(
         project="Soundbendor/instrument-classification",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJmZjY2NzQ5Yi0wZDVjLTRiODktOTNlNy0xODg3YTRkZTVmYTcifQ==",
     )
 
+    # neptune tags
+    run['sys/tags'].add(["LSTM", "test"])
+
     # Instantiate the dataset
     wav_length = 16000
-    dataset = AudioClassificationDataset(root_dir, csv_file, 16000)
+    num_samples = 20000
+    dataset = AudioClassificationDataset(root_dir, csv_file, wav_length, num_samples=num_samples)
     print("INFO: Dataset loaded.")
     dataset.check_audio()
     dataset.info()
     # TODO: add logging instead of printing.
 
-    # hyperparams
-    params = {
-        "learning_rate": 4e-4,
-        "dropout": 0.5,
-        "batch_size": 512,
-        "num_epochs": 50,
+    params.update({
         "input_size": dataset.wav_length,
         "num_classes": dataset.num_classes,
-        "data_length": len(dataset),
-        "val_split": 0.1,
-        "test_split": 0.1,
-        "device": device,
-        "model_name": "audio_lstm",
-        "hidden_size": 512,
-        "num_layers": 4,
-        "bidirectional": True,
-    }
+        "num_samples": len(dataset) if num_samples is None else num_samples
+        })
+    
+    run["logging/hyperparams"] = stringify_unsupported(params)
 
     # Set a random seed for reproducibility and shuffle dataset
     random.seed(42)
@@ -83,7 +81,10 @@ def main(root_dir, csv_file):
     print("INFO: Dataloaders created.")
 
     # Instantiate the model
-    model = AudioLSTM(params["input_size"], params["hidden_size"], params["num_layers"], params["num_classes"], params["bidirectional"], params["dropout"])
+    model = AudioLSTM(params["input_size"], params["hidden_dim"], params["num_layers"], params["num_classes"], params["bidirectional"], params["dropout_rate"])
+
+    # n_mfcc=40
+    # model = AudioNN(input_size=n_mfcc, num_classes=params["num_classes"])
     print("INFO: Model created.")
 
     if torch.cuda.device_count() > 1:
@@ -96,7 +97,7 @@ def main(root_dir, csv_file):
     optimizer = optim.Adam(model.parameters(), lr=params["learning_rate"])
 
     # Create model trainer
-    trainer = Trainer(model, criterion, optimizer, params, run, device)
+    trainer = Trainer(model, criterion, optimizer, run, device)
     print("INFO: Trainer Created.")
 
     # Training loop
@@ -129,22 +130,42 @@ def main(root_dir, csv_file):
         
     # Evaluation
     print("INFO: Evaluation.")
-    predicted, scores, labels = trainer.evaluate(test_loader)
-    results = calculate_metrics(predicted, scores, labels)
+    predicted, scores, y_true = trainer.evaluate(test_loader)
+    results = calculate_metrics(predicted, scores, y_true, dataset.num_classes)
     print_results(results, best_val_accuracy)
     run['results'] = results
     run.stop()
 
 
 if __name__ == "__main__":
-    # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 2:
-        print("Error: Please provide the root directory as command-line argument.")
-        print("Usage: python script.py <root_dir>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description='Train model with hyperparameters')
 
-    root_dir = sys.argv[1]
+    # Add data directory and hyperparameters as arguments
+    parser.add_argument('data_dir', type=str, help='Path to the data directory')
+    parser.add_argument('--learning_rate', type=float)
+    parser.add_argument('--batch_size', type=int)
+    parser.add_argument('--hidden_dim', type=int)
+    parser.add_argument('--dropout_rate', type=float)
+    parser.add_argument('--num_layers', type=int)
+
+    args = parser.parse_args()
+
+    root_dir = args.data_dir
     csv_file = os.path.join(root_dir, "dataset.csv")
 
+    params = {
+        "model_name": "audio_lstm",
+        'learning_rate': args.learning_rate,
+        'batch_size': args.batch_size,
+        'hidden_dim': args.hidden_dim,
+        'dropout_rate': args.dropout_rate,
+        'num_layers': args.num_layers,
+        "num_epochs": 25,
+        "val_split": 0.1,
+        "test_split": 0.1,
+        "device": device,
+        "bidirectional": True,
+    }
+
     # Call the main function with the provided paths
-    main(root_dir, csv_file)
+    main(root_dir, csv_file, params)
